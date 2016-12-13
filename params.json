@@ -1,0 +1,6 @@
+{
+  "name": "HILAB - HBV",
+  "tagline": "This is the first version of the unified HBV96 version at UNESCO-IHE.",
+  "body": "# MLAB-HBV96\r\nThis is the first version of the unified HBV96 version at UNESCO-IHE. The code is developed under the umbrella of the Hidroinformatics Laboratory at UNESCO-IHE (https://hilab.unesco-ihe.org/).\r\n\r\nThis folder contains the model routines\r\n - precipitation module (precipitation)\r\n - Snow module (snow)\r\n - soil moisture module (soil)\r\n - response module (response)\r\n - routing module (routing)\r\n \r\nThe model is integrated by single time steps (step_run.m).\r\nTo simulate a complete time series, the simulate.m file, can be used.\r\nAn example of use is given in sample_run.m\r\n\r\n## To do:\r\n\r\n- Code debugging and testing\r\n- Add performance metrics\r\n- Add automatic calibration\r\n- Add sensitivity analysis\r\n- Add data Assimilation\r\n- Add error correctors\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
