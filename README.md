@@ -15,9 +15,9 @@ An example of use is given in sample_run.m
 To do:
 ------
 
-Code debugging and testing
-Add performance metrics
-Add automatic calibration
-Add sensitivity analysis
-Add data Assimilation
-Add error correctors
+- Code debugging and testing
+- Add performance metrics
+- Add automatic calibration
+- Add sensitivity analysis
+- Add data Assimilation
+- Add error correctors
