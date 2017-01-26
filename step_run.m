@@ -24,7 +24,7 @@ p = Parameter vector
 
 p2 = non optimisable parameter vector
   1. tfac = Time factor for unit conversion (Number of hours in time step)
-  2. area = Catchment area [Km²]
+  2. area = Catchment area [KmÂ²]
   
 v = inputs
   1. avgPrec = Precipitation [mm]
@@ -39,7 +39,7 @@ st = model states
   4. lzOld = Lower zone [mm]
   5. wcOld = Water content in snow pack [mm]
 
-qNew = Outflow [m³/s]
+qNew = Outflow [mÂ³/s]
 spNew = Snow pack [mm]
 smNew = Soil moisture [mm]
 uzNew = Upper zone [mm]
@@ -69,7 +69,14 @@ wcNew = Water content in snow pack [mm]
   sfcf = p(18); % Snowfall corrector factor
 
   tfac = p2(1); % Time factor for unit conversion (Number of hours in time step)
-  area = p2(2); % Catchment Area [Km²]
+  area = p2(2); % Catchment Area [KmÂ²]
+  
+  % selecting the snow switch
+  if length(p2) == 3;
+    snow_switch = p2(3);
+  else
+    snow_switch = 1;
+  endif
 
 % Parse inputs  
 avgPrec = v(1); % Precipitation [mm]
@@ -84,12 +91,19 @@ uzOld = st(3); % Upper zone [mm]
 lzOld = st(4); % Lower zone [mm]
 wcOld = st(5); % Water content in snow pack [mm]
 
-% Precipitation routine
-[rf, sf] = precipitation(temp, ltt, utt, avgPrec, rfcf, sfcf, tfac);
+if snow_switch == 1;
+  % Precipitation routine
+  [rf, sf] = precipitation(temp, ltt, utt, avgPrec, rfcf, sfcf, tfac);
+  
+  % Snow routine
+  [inf, wcNew, spNew]	= snow(cfmax, tfac, temp, ttm, cfr, cwh, rf, ...
+                                sf, wcOld, spOld);
+else
+  inf = avgPrec;
+  wcNew = 0;
+  spNew = 0;
 
-% Snow routine
-[inf, wcNew, spNew]	= snow(cfmax, tfac, temp, ttm, cfr, cwh, rf, ...
-                             sf, wcOld, spOld);
+endif
 
 % Soil moisture routine 
 [smNew, uzInt_1, qDr] = soil(fc, beta, etf, temp, tm, ecorr, lp,...
