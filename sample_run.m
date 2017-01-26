@@ -12,8 +12,11 @@ param = [  9.95858456e-01,   1.99174032e+00,   9.97787883e-01,...
          6.20000000e-04,   4.28494565e-01,   1.14400004e+00,...
          8.48238270e-02,   8.00013673e-01,   7.01014615e-02,...
          4.16941937e-02,   1.26898027e+00,   9.98357889e-01, 0];
-         
-p2 = [1, area];
+
+
+% Snow switch is turn off by putting 0 in the last argument of p2, 1 is to turn on
+p2 = [1, area]; % No argument implies that snow pack is on
+p2 = [1, area, 0]; % 0 implies snow pack is off
 
 ll_temp = mean(temp)*ones(length(avg_prec), 1);
 v = [avg_prec(1), temp(1), evap(1), ll_temp(1)];
