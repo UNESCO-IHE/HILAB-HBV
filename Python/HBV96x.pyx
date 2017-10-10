@@ -12,6 +12,50 @@ from __future__ import division, print_function
 import numpy as np
 import scipy.optimize as opt
 
+# HBV base model parameters
+P_LB = [-1.5, #ltt
+        0.001, #utt
+        0.001, #ttm
+        0.04, #cfmax [mm c^-1 h^-1]
+        50.0, #fc
+        0.6, #ecorr
+        0.001, #etf
+        0.2, #lp
+        0.00042, #k [h^-1] upper zone
+        0.0000042, #k1 lower zone
+        0.001, #alpha
+        1.0, #beta
+        0.001, #cwh
+        0.01, #cfr
+        0.0, #c_flux
+        0.001, #perc mm/h
+        0.6, #rfcf
+        0.4,  #sfcf
+        1] # Maxbas
+
+P_UB = [2.5, #ttm
+        3.0, #utt
+        2.0, #ttm
+        0.4, #cfmax [mm c^-1 h^-1]
+        500.0, #fc
+        1.4, #ecorr
+        5.0, #etf
+        0.5, #lp
+        0.0167, #k upper zone
+        0.00062, #k1 lower zone
+        1.0, #alpha
+        6.0, #beta
+        0.1, #cwh
+        1.0, #cfr
+        0.08, #c_flux - 2mm/day
+        0.125, #perc mm/hr
+        1.4, #rfcf
+        1.4, #sfcf
+        10] # maxbas
+
+# Get random parameter set
+def get_random_pars():
+    return np.random.uniform(P_LB, P_UB)
 
 def _precipitation(double temp, double ltt, double utt, double prec, 
                    double rfcf, double sfcf, double tfac):
@@ -408,56 +452,17 @@ def calibrate(flow, avg_prec, temp, et, p2, init_st=None, ll_temp=None,
             return perf
         
     # initial guess
-    #x_0 = [1.0, 2.0, 1.0, 3.0, 250.0, 1.0, 0.15, 0.4, 0.04, 0.1, 0.5, 1.2, 0.1,
-    #       0.8, 0.05, 3.5, 1.0, 1.0]
-    x_0 = [  1.10354017e+00,   2.04819370e+00,   1.03303258e+00,
-             4.00000000e-01,   2.49993354e+02,   1.23535757e+00,
-             1.00000000e-03,   2.72316004e-01,   1.58087774e-03,
-             6.20000000e-04,   1.00000000e+00,   1.00000000e+00,
-             6.08948829e-02,   8.00533181e-01,   0.00000000e+00,
-             8.95204866e-03,   1.40000000e+00,   7.00415186e-01]
+    if x_0 is None:
+        # Randomly generated
+        x_0 = np.random.uniform(x_lb, x_ub)
     
     # Boundaries
     if x_lb is None:
-        x_lb = [-1.5, #ltt
-                0.001, #utt
-                0.001, #ttm
-                0.04, #cfmax [mm c^-1 h^-1]
-                50.0, #fc
-                0.6, #ecorr
-                0.001, #etf
-                0.2, #lp
-                0.00042, #k [h^-1] upper zone
-                0.0000042, #k1 lower zone
-                0.001, #alpha
-                1.0, #beta
-                0.001, #cwh
-                0.01, #cfr
-                0.0, #c_flux
-                0.001, #perc mm/h
-                0.6, #rfcf
-                0.4] #sfcf
+        x_lb = P_LB
     
     if x_ub is None:
-        x_ub = [2.5, #ltt
-                3.0, #utt
-                2.0, #ttm
-                0.4, #cfmax [mm c^-1 h^-1]
-                500.0, #fc
-                1.4, #ecorr
-                5.0, #etf
-                0.5, #lp
-                0.0167, #k upper zone
-                0.00062, #k1 lower zone
-                1.0, #alpha
-                6.0, #beta
-                0.1, #cwh
-                1.0, #cfr
-                0.08, #c_flux - 2mm/day
-                0.125, #perc mm/hr
-                1.4, #rfcf
-                1.4] #sfcf
-                
+        x_ub = P_UB
+        
     x_b = zip(x_lb, x_ub)
     
     # Model optimisation

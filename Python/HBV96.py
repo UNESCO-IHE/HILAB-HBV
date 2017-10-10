@@ -61,8 +61,12 @@ P_UB = [2.5, #ttm
         1.4, #sfcf
         10] # maxbas
 
-DEF_ST = [0.0, 30.0, 30.0, 30.0, 0.0]
+DEF_ST = [0.0, 10.0, 10.0, 10.0, 0.0]
 DEF_q0 = 10.0
+
+# Get random parameter set
+def get_random_pars():
+    return np.random.uniform(P_LB, P_UB)
 
 def _precipitation(temp, ltt, utt, prec, rfcf, sfcf, tfac):
     '''
@@ -421,7 +425,7 @@ def _step_run(p, p2, v, St):
     return q_new, [sp_new, sm_new, uz_new, lz_new, wc_new]
 
 
-def simulate(avg_prec, temp, et, par, p2, init_st=DEF_ST, ll_temp=None, 
+def simulate(avg_prec, temp, et, par, p2, init_st=None, ll_temp=None, 
              q_0=DEF_q0):
     '''
     ========
@@ -464,8 +468,8 @@ def simulate(avg_prec, temp, et, par, p2, init_st=DEF_ST, ll_temp=None,
         Model states for the complete time series [mm]
     '''
 
-
-    st = [init_st, ]
+    if init_st is None:
+        st = [DEF_ST, ]
 
     if ll_temp is None:
         ll_temp = [np.mean(temp), ] * len(avg_prec)
