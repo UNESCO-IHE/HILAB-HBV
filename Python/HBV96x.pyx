@@ -275,7 +275,7 @@ def _routing(q, maxbas=1):
     q_r = np.zeros_like(q, dtype='float64')
     q_temp = q
     for w_i in w:
-        q_r += q_temp*w_i
+        q_r += np.array(q_temp)*w_i
         q_temp = np.insert(q_temp, 0, 0.0)[:-1]
 
     return q_r
@@ -423,9 +423,9 @@ def simulate(avg_prec, temp, et, par, p2, init_st=None, ll_temp=None, q_0=10.0):
     return q_tr, st
 
 
-def calibrate(flow, avg_prec, temp, et, p2, init_st=None, ll_temp=None, 
-              x_lb=None, x_ub=None, obj_fun='NSE', wu=10, verbose=False, 
-              tol=0.001):
+def calibrate(flow, avg_prec, temp, et, p2, init_st=None, ll_temp=None,
+              x_0=None, x_lb=P_LB, x_ub=P_UB, obj_fun=_rmse, wu=10,
+              verbose=False, tol=0.001, minimise=True, fun_nam='RMSE'):
     '''
     =========
     Calibrate
@@ -433,6 +433,7 @@ def calibrate(flow, avg_prec, temp, et, p2, init_st=None, ll_temp=None,
     
     Running the calibration of the HBV-96
     '''
+    
     if obj_fun == 'NSE':
         def _cal_fun(par):
             q_sim = simulate(avg_prec[:-1], temp, et, par, p2, init_st=None, 
