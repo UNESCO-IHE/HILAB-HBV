@@ -339,7 +339,7 @@ def _routing(q, maxbas=1):
     q_r = np.zeros_like(q, dtype='float64')
     q_temp = q
     for w_i in w:
-        q_r += q_temp*w_i
+        q_r += np.array(q_temp)*w_i
         q_temp = np.insert(q_temp, 0, 0.0)[:-1]
 
     return q_r
