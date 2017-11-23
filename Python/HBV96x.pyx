@@ -448,7 +448,7 @@ def _rmse(x,y):
 
 def calibrate(flow, avg_prec, temp, et, p2, init_st=None, ll_temp=None,
               x_0=None, x_lb=P_LB, x_ub=P_UB, obj_fun=_rmse, wu=10,
-              verbose=False, tol=0.001, minimise=True, fun_nam='RMSE'):
+              verbose=False, tol=0.001, minimise=True):
     '''
     =========
     Calibrate
@@ -456,25 +456,23 @@ def calibrate(flow, avg_prec, temp, et, p2, init_st=None, ll_temp=None,
     
     Running the calibration of the HBV-96
     '''
-    
-    if obj_fun == 'NSE':
+    if minimise:
         def _cal_fun(par):
             q_sim = simulate(avg_prec[:-1], temp, et, par, p2, init_st=None, 
                              ll_temp=None, q_0=10.0)[0]
-            perf = -_nse(flow[wu:], q_sim[wu:])
+            perf = obj_fun(flow[wu:], q_sim[wu:])
             if verbose:
-                print('NSE: {0}'.format(-perf))
+                print('OF: {0}'.format(perf))
             return perf
-            
-    if obj_fun == 'RMSE':
+    else:
         def _cal_fun(par):
             q_sim = simulate(avg_prec[:-1], temp, et, par, p2, init_st=None, 
                              ll_temp=None, q_0=10.0)[0]
-            perf = _rmse(flow[wu:], q_sim[wu:])
+            perf = -obj_fun(flow[wu:], q_sim[wu:])
             if verbose:
-                print('RMSE: {0}'.format(perf))
+                print('OF: {0}'.format(-perf))
             return perf
-        
+
     # initial guess
     if x_0 is None:
         # Randomly generated
