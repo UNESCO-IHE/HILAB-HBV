@@ -422,6 +422,29 @@ def simulate(avg_prec, temp, et, par, p2, init_st=None, ll_temp=None, q_0=10.0):
     
     return q_tr, st
 
+def _nse(x, y):
+    '''
+    x = measured
+    y - Simulated
+    '''
+    a = np.square(np.subtract(x, y))
+    b = np.square(np.subtract(x, np.nanmean(x)))
+    if a.any < 0.0:
+        return(np.nan)
+    cdef double f = 1.0 - (np.nansum(a)/np.nansum(b))
+    return(f)
+
+
+def _rmse(x,y):
+    '''
+    x = measured
+    y - Simulated
+    '''
+    erro = np.square(np.subtract(x,y))
+    if erro.any < 0:
+        return(np.nan)
+    cdef double f = np.sqrt(1.*np.nanmean(erro))
+    return(f)
 
 def calibrate(flow, avg_prec, temp, et, p2, init_st=None, ll_temp=None,
               x_0=None, x_lb=P_LB, x_ub=P_UB, obj_fun=_rmse, wu=10,
@@ -473,26 +496,3 @@ def calibrate(flow, avg_prec, temp, et, p2, init_st=None, ll_temp=None,
     return params, performance
 
 
-def _nse(x, y):
-    '''
-    x = measured
-    y - Simulated
-    '''
-    a = np.square(np.subtract(x, y))
-    b = np.square(np.subtract(x, np.nanmean(x)))
-    if a.any < 0.0:
-        return(np.nan)
-    cdef double f = 1.0 - (np.nansum(a)/np.nansum(b))
-    return(f)
-
-
-def _rmse(x,y):
-    '''
-    x = measured
-    y - Simulated
-    '''
-    erro = np.square(np.subtract(x,y))
-    if erro.any < 0:
-        return(np.nan)
-    cdef double f = np.sqrt(1.*np.nanmean(erro))
-    return(f)
