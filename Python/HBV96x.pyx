@@ -264,7 +264,9 @@ def _routing(q, maxbas=1):
     This function implements the transfer function using a triangular 
     function
     """
-    assert maxbas >= 1, 'Maxbas value has to be larger than 1'
+    if maxbas < 1: 
+        print('WARNING: Maxbas value has to be larger than 1')
+        maxbas = 1
     # Get integer part of maxbas
     maxbas = int(maxbas)
     
