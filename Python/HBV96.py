@@ -251,12 +251,13 @@ def _soil(fc, beta, etf, temp, tm, e_corr, lp, tfac, c_flux, inf,
     qdr = max(sm_old + inf - fc, 0)
     _in = inf - qdr
     _r = ((sm_old/fc)** beta) * _in
-    _ep_int = (1.0 + etf*(temp - tm))*e_corr*ep
-    _ea = max(_ep_int, (sm_old/(lp*fc))*_ep_int)
+#    _ep_int = (1.0 + etf*(temp - tm))*e_corr*ep
+    _ep_int = e_corr*ep
+    _ea = min(_ep_int, (sm_old/(lp*fc))*_ep_int)
 
-    _cf = c_flux*((fc - sm_old)/fc)
+    _cf = tfac*c_flux*((fc - sm_old)/fc)
     sm_new = max(sm_old + _in - _r + _cf - _ea, 0)
-    uz_int_1 = uz_old + _r - _cf
+    uz_int_1 = uz_old + _r - _cf + qdr
 
     return sm_new, uz_int_1, qdr
 
@@ -295,6 +296,7 @@ def _response(tfac, perc, alpha, k, k1, area, lz_old, uz_int_1, qdr):
         Direct runoff [mm]
     
     '''    
+    perc = tfac*perc
     lz_int_1 = lz_old + np.min([perc, uz_int_1])
     uz_int_2 = np.max([uz_int_1 - perc, 0.0])
 
@@ -304,7 +306,7 @@ def _response(tfac, perc, alpha, k, k1, area, lz_old, uz_int_1, qdr):
     uz_new = max(uz_int_2 - (_q_0), 0)
     lz_new = max(lz_int_1 - (_q_1), 0)
 
-    q_new = area*(_q_0 + _q_1 + qdr)/(3.6*tfac)
+    q_new = area*(_q_0 + _q_1)/(3.6*tfac)
 
     return q_new, uz_new, lz_new
 

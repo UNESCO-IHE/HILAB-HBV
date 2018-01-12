@@ -12,7 +12,7 @@ from __future__ import division, print_function
 import numpy as np
 import scipy.optimize as opt
 
-# HBV base model parameters
+
 P_LB = [-1.5, #ltt
         0.001, #utt
         0.001, #ttm
@@ -52,6 +52,48 @@ P_UB = [2.5, #ttm
         1.4, #rfcf
         1.4, #sfcf
         10] # maxbas
+
+
+## HBV base model parameters
+#P_LB = [-1.5, #ltt
+#        0.001, #utt
+#        0.001, #ttm
+#        0.96, #cfmax [mm c^-1 d^-1]
+#        50.0, #fc
+#        0.6, #ecorr
+#        0.001, #etf
+#        0.2, #lp
+#        0.01, #k [d^-1] upper zone
+#        0.001, #k1 lower zone
+#        0.001, #alpha
+#        1.0, #beta
+#        0.001, #cwh
+#        0.01, #cfr
+#        0.0, #c_flux
+#        0.024, #perc mm/d
+#        0.6, #rfcf
+#        0.4,  #sfcf
+#        1] # Maxbas
+#
+#P_UB = [2.5, #ttm
+#        3.0, #utt
+#        2.0, #ttm
+#        9.6, #cfmax [mm c^-1 d^-1]
+#        500.0, #fc
+#        1.4, #ecorr
+#        5.0, #etf
+#        0.5, #lp
+#        0.4, #k upper zone
+#        0.062, #k1 lower zone
+#        1.0, #alpha
+#        6.0, #beta
+#        0.1, #cwh
+#        1.0, #cfr
+#        2.0, #c_flux - 2mm/day
+#        3.0, #perc mm/d
+#        1.4, #rfcf
+#        1.4, #sfcf
+#        10] # maxbas
 
 # Get random parameter set
 def get_random_pars():
@@ -193,27 +235,40 @@ def _soil(double fc, double beta, double etf, double temp, double tm,
     
     cdef double _r, _ep_int, _ea, _cf, sm_new, uz_int_1, qdr
 #    ep = ep/tfac
+#    _ep_int = (1.0 + etf*(temp - tm))*e_corr*ep
+#    _ea = tfac * max(_ep_int, (sm_old/(lp*fc))*_ep_int)
+#    
+#    qdr = max(sm_old + inf - fc - _ea, 0)
+#    _in = inf - qdr
+#    _r = ((sm_old/fc)** beta) * _in
+#    
+#    
+#    
+##    _r = ((sm_old/fc) ** beta) * _in
+##    _ep_int = e_corr*ep
+##    
+##    if sm_old/(lp*fc) < 1.0: 
+##        _ea = (sm_old/(lp*fc))*_ep_int 
+##    else: 
+##        _ea = _ep_int 
+#        
+#    
+##    if c_flux*(1.0 - (sm_old/fc)) < uz_old:
+##        _cf = c_flux*(1.0 - (sm_old/fc))
+##    else:
+##        _cf = uz_old 
+#    _cf = tfac*c_flux*((fc - sm_old)/fc)
+#    sm_new = max(sm_old + _in - _r + _cf - _ea, 0)        
+#    uz_int_1 = uz_old + _r - _cf + qdr
+    _ep_int = e_corr*ep
+    _ea = min(_ep_int, (sm_old/(lp*fc))*_ep_int)
     qdr = max(sm_old + inf - fc, 0)
     _in = inf - qdr
-    _r = ((sm_old/fc)** beta) * _in
-    _ep_int = (1.0 + etf*(temp - tm))*e_corr*ep
     
-#    _r = ((sm_old/fc) ** beta) * _in
-#    _ep_int = e_corr*ep
-#    
-#    if sm_old/(lp*fc) < 1.0: 
-#        _ea = (sm_old/(lp*fc))*_ep_int 
-#    else: 
-#        _ea = _ep_int 
-        
-    _ea = max(_ep_int, (sm_old/(lp*fc))*_ep_int)
-#    if c_flux*(1.0 - (sm_old/fc)) < uz_old:
-#        _cf = c_flux*(1.0 - (sm_old/fc))
-#    else:
-#        _cf = uz_old 
-    _cf = c_flux*((fc - sm_old)/fc)
+    _r = ((sm_old/fc)** beta) * _in
+    _cf = tfac*c_flux*((fc - sm_old)/fc)
     sm_new = max(sm_old + _in - _r + _cf - _ea, 0)        
-    uz_int_1 = uz_old + _r - _cf
+    uz_int_1 = uz_old + _r - _cf + qdr
     
     return sm_new, uz_int_1, qdr
 
@@ -222,6 +277,8 @@ def _response(double tfac, double perc, double alpha, double k, double k1,
               double area, double lz_old, double uz_int_1, double qdr):
              
     cdef double lz_int_1, uz_int_2, _q_0, _q_1, uz_new, lz_new, q_new
+    
+    perc = tfac*perc
     
     if perc < uz_int_1: 
         lz_int_1 = lz_old + perc
@@ -233,13 +290,13 @@ def _response(double tfac, double perc, double alpha, double k, double k1,
     else:
         uz_int_2 = 0.0
 
-    _q_0 = k*(uz_int_2**(1.0 + alpha))
-    _q_1 = k1*lz_int_1
+    _q_0 = max(k*(uz_int_2**(1.0 + alpha)), uz_int_2)
+    _q_1 = max(k1*lz_int_1, lz_int_1)
     
     uz_new = max(uz_int_2 - (_q_0), 0)
     lz_new = max(lz_int_1 - (_q_1), 0)
     
-    q_new = area*(_q_0 + _q_1 + qdr)/(3.6)
+    q_new = area*(_q_0 + _q_1)/(3.6*tfac)
     return q_new, uz_new, lz_new
 
 
