@@ -267,6 +267,7 @@ def _soil(double fc, double beta, double etf, double temp, double tm,
     _in = inf - qdr
     
     _r = ((sm_old/fc)** beta) * _in
+    
     _cf = tfac*c_flux*((fc - sm_old)/fc)
     sm_new = max(sm_old + _in - _r + _cf - _ea, 0)        
     uz_int_1 = uz_old + _r - _cf + qdr
@@ -291,8 +292,11 @@ def _response(double tfac, double perc, double alpha, double k, double k1,
     else:
         uz_int_2 = 0.0
 
-    _q_0 = max(k*(uz_int_2**(1.0 + alpha)), uz_int_2)
-    _q_1 = max(k1*lz_int_1, lz_int_1)
+#    _q_0 = min(k*(uz_int_2**(1.0 + alpha)), uz_int_2)
+#    _q_1 = min(k1*lz_int_1, lz_int_1)
+    
+    _q_0 = k*(uz_int_2**(1.0 + alpha))
+    _q_1 = k1*lz_int_1
     
     uz_new = max(uz_int_2 - (_q_0), 0)
     lz_new = max(lz_int_1 - (_q_1), 0)

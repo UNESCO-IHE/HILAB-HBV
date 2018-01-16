@@ -251,10 +251,9 @@ def _soil(fc, beta, etf, temp, tm, e_corr, lp, tfac, c_flux, inf,
     qdr = max(sm_old + inf - fc, 0)
     _in = inf - qdr
     _r = ((sm_old/fc)** beta) * _in
-#    _ep_int = (1.0 + etf*(temp - tm))*e_corr*ep
-    _ep_int = e_corr*ep
+    _ep_int = (1.0 + etf*((temp - tm)/tm))*e_corr*ep
+#    _ep_int = e_corr*ep
     _ea = min(_ep_int, (sm_old/(lp*fc))*_ep_int)
-
     _cf = tfac*c_flux*((fc - sm_old)/fc)
     sm_new = max(sm_old + _in - _r + _cf - _ea, 0)
     uz_int_1 = uz_old + _r - _cf + qdr
